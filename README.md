@@ -1,5 +1,5 @@
 # Beliefs, Aggregate Risk, and the U.S. Housing Boom 
-# By Margaret Jacobson, Federal Reserve Board
+### By Margaret Jacobson, Federal Reserve Board
 
 These are the views of the author and not those of the Federal Reserve Board, System or Staff.
 
@@ -19,7 +19,7 @@ All versions can be called from various configurations of `parameters.f90`, whic
 
 ## Figure 3b
 
-##  Red dotted lines (credit conditions + income): 
+###  Red dotted lines (credit conditions + income): 
     - `parameters.f90`: solve_for_coeffs=0, high_lamb=1, type_sim=1, no_MIT=0, no_pref=1, low_rate=0, high_rate=0
     - `coefficients2.csv`: paste in column C from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
     - use `run_KS.sh`
