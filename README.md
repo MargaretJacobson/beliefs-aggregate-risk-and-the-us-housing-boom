@@ -9,11 +9,11 @@ The fortran code to solve the quantitative model is designed to run on a super c
 
 2) Krusell Smith with learning
 
-Model 1 can be called from `run_KS.sh' and uses `coefficients2.csv'
+Model 1 can be called from `run_KS.sh` and uses `coefficients2.csv`
 
-Modeld 2 can be called from `run_KS_learning.sh' and uses `coefficients3.csv'
+Modeld 2 can be called from `run_KS_learning.sh` and uses `coefficients3.csv`
 
-These scripts run the makefile. Adding `$(debug)' to line 17 of  `makefile' will include debugger flags.
+These scripts run the makefile. Adding `$(debug)` to line 17 of  `makefile` will include debugger flags.
 
 All versions can be called from various configurations of `parameters.f90', which then calls in the requisite versions of coefficients from the various `coefficients*.xlsx' files
 
