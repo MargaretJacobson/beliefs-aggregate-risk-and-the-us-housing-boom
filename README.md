@@ -20,90 +20,132 @@ All versions can be called from various configurations of `parameters.f90`, whic
 
 
 ## Tables 1 and 3 (Table 2 is just parameters)
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=0, type_sim=1, no_MIT=0, no_pref=1, low_rate=0, high_rate=0
+- `parameters.f90`: high_lamb=0, type_sim=1, no_MIT=0, no_pref=1, high_rate=0
 - `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
-- use `run_KS.sh`,
-### output
-`Text_tables.m`
+- `run_KS.sh`,
+**output:** `Text_tables.m`
  
 ## Figure 3b
 
 ###  Red dotted lines (credit conditions + income): 
-- `parameters.f90`: solve_for_coeffs=0, **high_lamb=1**, type_sim=1, no_MIT=0, no_pref=1, low_rate=0, high_rate=0
-- `coefficients2.csv`: paste in column C from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
-- use `run_KS.sh`
+- `parameters.f90`: **high_lamb=1**, type_sim=1, no_MIT=0, no_pref=1, high_rate=0
+- `coefficients2.csv`: paste in **column C** from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
+- `run_KS.sh`
 
 ### Solid blue lines (beliefs + credit conditions + income): 
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=1, **type_sim=2**, no_MIT=0, no_pref=1, low_rate=0, high_rate=0, **gain=0.503**
+- `parameters.f90`: **high_lamb=1**, **type_sim=2**, no_MIT=0, no_pref=1, high_rate=0, **gain=0.503**
 - `coefficients2.csv`: paste in **column A** from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
-- use `run_KS_learning.sh`
+- `run_KS_learning.sh`
 - Note: if you set gain=0, you should get the same results from `run_KS_learning.sh` as `run_KS.sh` provided that `coefficients2.csv` is the same.
 
-### output
-`Graphs_simulation.m`
+**output:** `Graphs_simulation.m`
 
 ## Figure 4
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=1, type_sim=2, no_MIT=0, no_pref=1, low_rate=0, high_rate=0, **gain=0.503, 0.59, 0.55, 0.4725, 0.4225**
+- `parameters.f90`: high_lamb=1, type_sim=2, no_MIT=0, no_pref=1, high_rate=0, **gain=0.503, 0.59, 0.55, 0.4725, 0.4225**
 - `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
-- use `run_KS_learning.sh`
+- `run_KS_learning.sh`
 
-### output
- `Graphs_simulation_gain_sensitivity.m`
+**output:** `Graphs_simulation_gain_sensitivity.m`
 
    
 ## Figures 5 to 7 and table 4
 ### Solid blue lines (same as Figure 3b)
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=1, type_sim=2, no_MIT=0, no_pref=1, low_rate=0, high_rate=0, gain=0.503
+- `parameters.f90`: high_lamb=1, type_sim=2, no_MIT=0, no_pref=1, high_rate=0, **gain=0.503**
 - `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
-- use `run_KS_learning.sh`
+- `run_KS_learning.sh`
 
 ### Dashed purple lines
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=1, **type_sim=1**, **no_MIT=1**, **no_pref=0**, low_rate=0, high_rate=0, gain=0.503
-- **`coefficients3.csv`**: paste in column A from **`coefficients2_save.xlsx`** into column A of `coefficients2.csv`. 
-- use `run_KS.sh'
+- `parameters.f90`: high_lamb=1, **type_sim=1**, **no_MIT=1**, **no_pref=0**, high_rate=0, gain=0.503
+- **`coefficients3.csv`**: paste in column A from **`coefficients3_save.xlsx`** into column A of `coefficients3.csv`. 
+- `run_KS.sh'
 
-### output
-`Graphs_simulation.m`
+**output:** `Graphs_simulation.m`
 
 ## Figure 8
+### Solid blue lines 
+- `parameters.f90`: high_lamb=1, type_sim=2, no_MIT=0, no_pref=1, **high_rate=1**, gain=0.503
+- `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
+- `run_KS_learning.sh`
+
+### Dashed purple lines
+- `parameters.f90`: high_lamb=1, **type_sim=1**, **no_MIT=1**, **no_pref=0**, **high_rate=1**, gain=0.503
+- **`coefficients3.csv`**: paste in column A from **`coefficients3_save.xlsx`** into column A of `coefficients3.csv`. 
+- `run_KS.sh'
+
+**output:** `Graphs_simulation_high_interest_rate.m`
 
 ## Figure 9 
+Edit the file `mod_initial_Y.f90` and uncomment lines 177 to 191.
 
-## Figure 10
+### Solid blue lines 
+- `parameters.f90`: high_lamb=1, type_sim=2, no_MIT=0, no_pref=1, **high_rate=0**, gain=0.503
+- `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
+- `run_KS_learning.sh`
 
-## Figure 11
+### Dashed purple lines
+- `parameters.f90`: high_lamb=1, **type_sim=1**, **no_MIT=1**, **no_pref=0**, **high_rate=0**, gain=0.503
+- **`coefficients3.csv`**: paste in column A from **`coefficients3_save.xlsx`** into column A of `coefficients3.csv`. 
+- `run_KS.sh'
+
+**output:** `Graphs_simulation_lower_LTV.m`
+
+## Figures 10 and 11
+- `parameters.f90`: **high_lamb=0**, type_sim=1, **no_MIT=0**, **no_pref=1**, high_rate=0
+- `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
+- `run_KS.sh`
+
+**output:** `life_cycle_graphs.m`
 
 ## Table 5 (Table 6 is updated by hand)
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=0, type_sim=1, no_MIT=0, no_pref=1, low_rate=0, high_rate=0
+- `parameters.f90`: high_lamb=0, type_sim=1, no_MIT=0, no_pref=1, high_rate=0
 - `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
 - use `run_KS.sh`
-- 
-### output
-`Text_tables.m`
+
+**output:** `Text_tables.m`
 
 ## Tables 7 and 8
-- `parameters.f90`: solve_for_coeffs=0, high_lamb=0, type_sim=1, no_MIT=0, no_pref=1, low_rate=0, high_rate=0
+- `parameters.f90`: high_lamb=0, type_sim=1, no_MIT=0, no_pref=1, high_rate=0
 - `coefficients2.csv`: paste in column A from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
 - use `run_KS.sh`
 
-### output 
-`Tables_segmentation.m`
+**output:** `Tables_segmentation.m`
 
 ## Table 9 (To-do)
 
 ## Tables 10 and 11
-- `parameters.f90`: solve_for_coeffs=0, **high_lamb=1**, type_sim=1, **no_MIT=1**, no_pref=1, low_rate=0, high_rate=0
+- `parameters.f90`: **high_lamb=1**, type_sim=1, **no_MIT=1**, no_pref=1, high_rate=0
 - `coefficients2.csv`: paste in **column D** from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
 - use `run_KS.sh`
 
-### output
-`Text_Tables_Appendix_Markov.m`
+**output:** `Text_Tables_Appendix_Markov.m`
 
-## Figure 16
+## Figure 16 (figures 12 to 15 are from data) (To-do)
 
 ## Figure 17
+### Dashed purple lines (same as figure 5)
+- `parameters.f90`: high_lamb=1, **type_sim=1**, **no_MIT=1**, **no_pref=0**, **high_rate=0**, gain=0.503
+- **`coefficients3.csv`**: paste in column A from **`coefficients3_save.xlsx`** into column A of `coefficients3.csv`. 
+- `run_KS.sh'
 
-## Figure 18
+### Solid blue lines
+- `parameters.f90`: high_lamb=1, type_sim=1, **no_MIT=0**, no_pref=0, high_rate=0, gain=0.503
+- **`coefficients3.csv`**: paste in column A from **`coefficients3_save.xlsx`** into column A of `coefficients3.csv`. 
+- `run_KS.sh'
+
+**output:** `Graphs_simulation_2024_KMV_compare.m`
+
+## Figure 18 (Edit below here)
+###  Red dotted lines (credit conditions + income): 
+- `parameters.f90`: **high_lamb=1**, type_sim=1, no_MIT=0, no_pref=1, high_rate=0
+- `coefficients2.csv`: paste in **column C** from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. These are converged coefficients, to solve for coefficients as a fixed point set solve_for_coeffs=1.
+- `run_KS.sh`
+
+### Solid blue lines (beliefs + credit conditions + income): 
+- `parameters.f90`: **high_lamb=1**, **type_sim=2**, no_MIT=0, no_pref=1, high_rate=0, **gain=0.503**
+- `coefficients2.csv`: paste in **column A** from `coefficients2_save.xlsx` into column A of `coefficients2.csv`. 
+- `run_KS_learning.sh`
+- Note: if you set gain=0, you should get the same results from `run_KS_learning.sh` as `run_KS.sh` provided that `coefficients2.csv` is the same.
+
 
 ## Figure 19
 
