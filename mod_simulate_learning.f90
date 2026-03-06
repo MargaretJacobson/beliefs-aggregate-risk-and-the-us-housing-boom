@@ -197,7 +197,7 @@ contains
 		end do
 		close(3)
 	else
-		open(3,file='coefficients1.csv',status='old',action='read')
+		open(3,file='coefficients2_covid.csv',status='old',action='read')
 		do iM=1,mom+1    
 			do iY=1,nY*nlamb
 				do iYY=1,nY*nlamb
@@ -266,7 +266,7 @@ contains
 		last(iAgg,1:2)=last(iAgg,3:4)
 	end do
 	
-	do iAggAgg=1,4
+	do iAggAgg=1,ny*nlamb
 		if (last(1,iAggAgg)==0) then
 			last(1,iAggAgg)=last(3,iAggAgg)
 		end if
@@ -296,7 +296,7 @@ contains
 		lastlast(iAgg,1:2)=lastlast(iAgg,3:4)
 	end do
 	
-	do iAggAgg=1,4
+	do iAggAgg=1,ny*nlamb
 		if (lastlast(1,iAggAgg)==0) then
 			lastlast(1,iAggAgg)=lastlast(3,iAggAgg)
 		end if
@@ -337,18 +337,18 @@ contains
 		
         
         ! least squares or constant gain learning    
-		if (AggT_loc(it)>2 ) then  !.or. boom_count>1 ) then 
+		if (AggT_loc(it)==1 .or. AggT_loc(it)==5 ) then  !.or. boom_count>1 ) then 
+			gain(AggT_loc(it),:)=gain_param !gain(AggT_loc(it),iYY)/(gain(AggT_loc(it),iYY)+1d0) 
+		else 
+
 			do iYY=1,ny*nlamb
 				if (AggT_loc(it-1)==1) then
 					gain(AggT_loc(it),iYY)=gain(AggT_loc(it),iYY)*(1d0/(5d0*gain(AggT_loc(it),iYY)+1d0)) 
 				else 
-					gain(AggT_loc(it),iYY)=gain(AggT_loc(it),iYY)/(gain(AggT_loc(it),iYY)+1d0) !1d0/real(count(AggT_loc(it),4)-1) 
+					gain(AggT_loc(it),iYY)=gain(AggT_loc(it),iYY)/(gain(AggT_loc(it),iYY)+1d0) 
 				
 				end if 
 			end do
-
-		else 
-			gain(AggT_loc(it),:)=gain_param
 		end if 
 		
 			
@@ -364,19 +364,25 @@ contains
 		if (AggT_loc(it)<3) then
 			ind(1)=1
 			ind(2)=2
-		else
+		else if (AggT_loc(it)>2 .and. AggT_loc(it)<5) then
 			ind(1)=3
 			ind(2)=4
+		else if (AggT_loc(it)>4) then 
+			ind(1)=5
+			ind(2)=6
 		end if 
 		if (AggT_loc(it-2)<3) then
 			ind_old(1)=1
 			ind_old(2)=2
-		else
+		else if (AggT_loc(it-2)>=2 .and. AggT_loc(it-2)<5) then 
 			ind_old(1)=3
 			ind_old(2)=4
+		else 
+			ind_old(1)=5
+			ind_old(2)=6
 		end if 
 		pred=0d0		
-		do iYY=1,4 !1,2 !ind,ind+1
+		do iYY=1,nY*nlamb !1,2 !ind,ind+1
 			! p0=p_{\mathcal{Z}_{t-1}} equals the last equilibrium price from {Z,Z'}
 			! Here we know that Z=Agg_loc(it), but we need to compute this for both future values of Z' (Z'={3,4} or Z'={1,2})
 			! pred is the predicted value of p_t based on the coefficients from the last occurance of {Z,Z'}
@@ -464,17 +470,21 @@ contains
 				a_new2(iYY,1,iP)=gain2*gain(AggT_loc(it),iYY)*det(iYY)*(Rt_new(2,2,iYY)-Rt_new(1,2,iYY)*xvec(iYY))*(P1(iYY)-pred2(iYY))+ acoeff2(AggT_loc(it),iYY,1)!a_out_all(last(AggT_loc(it),iYY),iYY,1) !  
 				a_new2(iYY,2,iP)=gain2*(gain(AggT_loc(it),iYY)*det(iYY)*(-Rt_new(2,1,iYY)+Rt_new(1,1,iYY)*xvec(iYY)))*(P1(iYY)-pred2(iYY))+acoeff2(AggT_loc(it),iYY,2) !a_out_all(last(AggT_loc(it),iYY),iYY,2) !
 							
-				if (iYY==1 .or. iYY==3) then 
+				if (iYY==1 .or. iYY==3 .or. iYY==5) then 
 					pprime_new(1,iP)=exp(a_new(iYY,1,iP)+a_new(iYY,2,iP)*log(P(iP)))
 					pprime_new2(1,iP)=exp(a_new2(iYY,1,iP)+a_new2(iYY,2,iP)*log(P(iP)))
+					print*, 'pprime_new, a1', iP,iYY, pprime_new(1,iP), a_new(iYY,:,iP)
+					print*, 'pprime grid', pprime(iY,1,iP,:)
 
 				else
 					pprime_new(2,iP)=exp(a_new(iYY,1,iP)+a_new(iYY,2,iP)*log(P(iP)))
 					pprime_new2(2,iP)=exp(a_new2(iYY,1,iP)+a_new2(iYY,2,iP)*log(P(iP)))
+					print*, 'pprime_new, a1', iP,iYY, pprime_new(2,iP), a_new(iYY,:,iP)
+					print*, 'pprime grid', pprime(iY,2,iP,:)
 
 				end if 
-				print*, 'pprime_new, a1', iP,iYY, pprime_new(iYY,iP), a_new(iYY,:,iP)
-				print*, 'pprime_new, a2', iP,iYY, pprime_new2(iYY,iP), a_new2(iYY,:,iP)
+				!print*, 'pprime_new, a1', iP,iYY, pprime_new(iYY,iP), a_new(iYY,:,iP)
+				!print*, 'pprime_new, a2', iP,iYY, pprime_new2(iYY,iP), a_new2(iYY,:,iP)
 
 			end do     
               
@@ -503,13 +513,13 @@ contains
 				do iD=1,nD+2
 					if (rent_buy(iI,it)==2 .and. (iD==6 .or. iD==7)) then ! Own to rent or buy
 if (Wealth(iI,iP)+inc>=0d0) then 
- V_sim(iI,iP,iD)=interp5qnoextrap(L,H,B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(:,:,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),L_sim_star(iI,it),H_sim_star(iI,it),Wealth(iI,iP)+inc,pprime_new2(1,iP),pprime_new2(2,iP)) 
+ V_sim(iI,iP,iD)=interp5qnoextrap(L,H,B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(:,:,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),L_sim_star(iI,it),H_sim_star(iI,it),Wealth(iI,iP)+inc,pprime_new(1,iP),pprime_new(2,iP)) 
 else
- V_sim(iI,iP,iD)=interp5qnoextrap(L,H,Bs,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(:,:,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),L_sim_star(iI,it),H_sim_star(iI,it),Wealth(iI,iP)+inc,pprime_new2(1,iP),pprime_new2(2,iP)) 
+ V_sim(iI,iP,iD)=interp5qnoextrap(L,H,Bs,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(:,:,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),L_sim_star(iI,it),H_sim_star(iI,it),Wealth(iI,iP)+inc,pprime_new(1,iP),pprime_new(2,iP)) 
 
 end if 
 					else if (rent_buy(iI,it)==2 .and. (iD==2 .or. iD==3) .or. (rent_buy(iI,it)==2 .and. iD==5) ) then
-							V_sim(iI,iP,iD)=interp5qnoextrap(L,H,B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(:,:,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),L_sim_star(iI,it),H_sim_star(iI,it),B_sim_star(iI,it),pprime_new2(1,iP),pprime_new2(2,iP))
+							V_sim(iI,iP,iD)=interp5qnoextrap(L,H,B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(:,:,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),L_sim_star(iI,it),H_sim_star(iI,it),B_sim_star(iI,it),pprime_new(1,iP),pprime_new(2,iP))
 					else if ((rent_buy(iI,it)==1 .and. (iD==4 .or. iD==1))  ) then 
  
 								!if (iY==1 .or. iY==2) then
@@ -520,9 +530,9 @@ end if
  
 								!if (iY==1 .or. iY==2) then
 						if (Wealth(iI,iP)+inc>0d0) then ! B(1)) then
-						V_sim(iI,iP,iD)=interp3qnoextrap(B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(1,1,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),Wealth(iI,iP)+inc,pprime_new2(1,iP),pprime_new2(2,iP))
+						V_sim(iI,iP,iD)=interp3qnoextrap(B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(1,1,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),Wealth(iI,iP)+inc,pprime_new(1,iP),pprime_new(2,iP))
 							else 
-						V_sim(iI,iP,iD)=interp3qnoextrap(Bs,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(1,1,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),Wealth(iI,iP)+inc,pprime_new2(1,iP),pprime_new2(2,iP))
+						V_sim(iI,iP,iD)=interp3qnoextrap(Bs,pprime(iY,1,iP,:),pprime(iY,2,iP,:),V_b(1,1,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,iD),Wealth(iI,iP)+inc,pprime_new(1,iP),pprime_new(2,iP))
 							
 							end if 
 								
@@ -563,10 +573,10 @@ end if
                 else if ((max_loc_sim(iI,iP)==buy .or. max_loc_sim(iI,iP)==rent) .and. rent_buy(iI,it)==2) then   
 					if (Wealth(iI,iP)+inc<0d0) then !B(1)) then 	
 						H_sim(iI,iP)=interp3qnoextrap(Bs,pprime(iY,1,iP,:),pprime(iY,2,iP,:),HH_b(1,1,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,max_loc_sim(iI,iP)),&
-						Wealth(iI,iP)+inc,pprime_new2(1,iP),pprime_new2(2,iP))
+						Wealth(iI,iP)+inc,pprime_new(1,iP),pprime_new(2,iP))
 					else
 						H_sim(iI,iP)=interp3qnoextrap(B,pprime(iY,1,iP,:),pprime(iY,2,iP,:),HH_b(1,1,:,ExoT_loc(iI),iP,age_sim(iI,it),:,:,max_loc_sim(iI,iP)),&
-						Wealth(iI,iP)+inc,pprime_new2(1,iP),pprime_new2(2,iP))					
+						Wealth(iI,iP)+inc,pprime_new(1,iP),pprime_new(2,iP))					
 					
 					end if 
 
@@ -589,7 +599,11 @@ end if
             
 
                 end if
+				
+			!		if (it==200) then ! .and. H_sim(iI,iP)<0) then ! .or. (it==399 .and. (iP==6 .or. iP==7))) then
 
+			!		print*, iP, iI, max_loc_sim(iI,iP),H_sim_star(iI,it),B_sim_star(iI,it),L_sim_star(iI,it), H_sim(iI,iprim), age_sim(iI,it),V_sim(iI,iP,:),Wealth(iI,iP)+inc,rent_buy(iI,it) !, V_b(1,1,7,ExoT_loc(iI),iP,age_sim(iI,it),4)
+			!end if 
 					
 						max_loc_p(iP,it,max_loc_sim(iI,iP))=max_loc_p(iP,it,max_loc_sim(iI,iP))+1
                 end do
@@ -723,8 +737,8 @@ count_rent_p=sum((-1)*(rent_buy(:,it)-2))
 				print*, 'acoeff solve 2', acoeff_solve(Aggt_loc(it),:,2),'acoeff 2', acoeff(Aggt_loc(it),:,2)
                
 			   	print*, 'pprime_new', interp1q(p,pprime_new(1,:),pstar(it)),interp1q(p,pprime_new(2,:),pstar(it))
-				print*, 'pprime_solve', pprime_solve(:,1), 'prediction 1', exp(acoeff(Aggt_loc(it),ind(1),1)+acoeff(Aggt_loc(it),ind(1),2)*log(pstar(it)))
-				print*, 'pprime_solve', pprime_solve(:,2), 'prediction 2', exp(acoeff(Aggt_loc(it),ind(2),1)+acoeff(Aggt_loc(it),ind(2),2)*log(pstar(it)))
+				print*, 'pprime_solve', pprime_solve(:,ind(1)), 'prediction 1', exp(acoeff(Aggt_loc(it),ind(1),1)+acoeff(Aggt_loc(it),ind(1),2)*log(pstar(it)))
+				print*, 'pprime_solve', pprime_solve(:,ind(2)), 'prediction 2', exp(acoeff(Aggt_loc(it),ind(2),1)+acoeff(Aggt_loc(it),ind(2),2)*log(pstar(it)))
 			
             end if
 			last(AggT_loc(it),Yreveal)=it
@@ -1013,7 +1027,10 @@ count_rent_p=sum((-1)*(rent_buy(:,it)-2))
 					
 					homeownership(it)=homeownership(it)+real(rent_buy(iI,it)-1d0)
  
-
+		!			if (it>=200 .and. it<202) then
+		!	if (it==1) then	
+		!				print*, it,',', iI,',', pstar(it),',', age_sim(iI,it),',', B_sim_star(iI,it+1),',', L_sim_star(iI,it+1),',', H_sim_star(iI,it+1),',', B_sim_star(iI,it),',', L_sim_star(iI,it),',', H_sim_star(iI,it),',', max_loc_sim_star(iI,it),',', rent_buy(iI,it),',',V_sim_star(iI,it,:),',',q_sim_star(iI,it),',',ET_loc(iI,it),',',c_sim_star(iI,it)
+		!			end if		
 
 		   end do
 

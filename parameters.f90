@@ -14,11 +14,17 @@ module parameters
 	integer, parameter :: initial_dist_opt=1	! alternative initial distributions
 	integer, parameter :: no_pref=1	! =1 no preference shocks, =0 allows for preference shocks
 	integer, parameter :: no_agg_phi=0 !(1-no_MIT)
-	integer, parameter :: low_rate=0			! Adds low interest rates to a shift in credit conditions
-	integer, parameter :: shrink=1		! Set to 1 for normal sized grids and agents, set to 2, 3, ... etc to shrink grid points
+	integer, parameter :: shrink=2		! Set to 1 for normal sized grids and agents, set to 2, 3, ... etc to shrink grid points
 	integer, parameter :: hinterp=1		! Set to 1 to interpolate over H dimension, set to 1 otherwise
 	integer, parameter :: buy_grid=0	! Set to 0 for no exta interpolation
-	integer, parameter :: high_rate=1
+	integer, parameter :: covid=1		! set to 1 to have a second housing bomo in 2019
+	integer, parameter :: low_rate=1		! Set to 1 for a lower rate in covid
+	integer, parameter :: high_rate=0		! Set to 1 for a higher rate as credit conditions shiftreal(8), parameter :: rate_bps=0d0 !-50d-4 ! 25 bps
+	real(8), parameter :: rate_bps=0d0 !-50d-4 ! 25 bps
+	integer, parameter :: tighten_credit=0		! Set to zero for no credit condition counterfactual. Otherwise set to 201, 202, or 203
+	integer, parameter :: fiscal_transfer=1		! allow for a fiscal transfer in covid
+	real(8), parameter :: trans_amount=0d0 !1d-3		! Need to calibrate
+	
 	
 	
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -36,7 +42,7 @@ module parameters
     integer, parameter :: nR=3													! Number of rental housing grid points
     integer, parameter :: nE=5     												! Individual income grid points 
 	integer, parameter :: nY=2													! Number of Aggregate income grid points, values other than 2 have not been tested
-	integer, parameter :: nlamb=2*(1-solve_for_coeffs)+2*solve_for_coeffs*no_MIT +1*(1-no_MIT)*solve_for_coeffs				 	! Can be 1 or 2. Must be =1 when solving coefficients and not markov	
+	integer, parameter :: nlamb=2*(1-solve_for_coeffs)+2*solve_for_coeffs*no_MIT +1*(1-no_MIT)*solve_for_coeffs	+covid		 	! Can be 1 or 2. Must be =1 when solving coefficients and not markov	
 	integer, parameter :: nphi=no_pref+(1-no_pref)*3
 	real(8), parameter :: curve=2d0 											! Grid curvature
 	integer, parameter :: KMV=1													! =1 sets grids to exactly what KMV has, 0= an approximation
@@ -83,7 +89,7 @@ module parameters
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	real(8), parameter :: agg_theta=no_Agg+(1-no_Agg)*0.9d0 					! Aggregate income probabilities. Sets to one if there is no aggregate income risk.
 	real(8), parameter :: agg_lamb=no_Agg_lend+(1-no_Agg_lend)*(1-no_MIT)&
-	+(1-no_Agg_lend)*no_MIT*1d0 !0.99d0 !0.99d0 !0.99d0												! Aggregate credit condition probabilities. Sets to one if there is no aggregate income risk or MIT shocks. SEts to 0.98 if no_MIT=1
+	+(1-no_Agg_lend)*no_MIT*0.99d0 !0.99d0 !0.99d0 !0.99d0												! Aggregate credit condition probabilities. Sets to one if there is no aggregate income risk or MIT shocks. SEts to 0.98 if no_MIT=1
 	! THey have 0.9d0 in their code instead of 0.98
 	real(8), parameter :: Y2=0.965d0 											! Low state aggregate ubcine
 	real(8), parameter :: Y1=Y2*no_agg+(1-no_Agg)*1.035d0						! High state aggregate income
@@ -92,41 +98,35 @@ module parameters
 	! solve_for_coeffs=1, high_nlamb=1 sets (high,high)
 	! solve_for_coeffs=1, high_nlamb=0 sets (low,low)
 	
-	real(8), parameter, dimension(2) :: lambdaLTV=(/0.95d0*(1-high_nlamb)+high_nlamb*1.1d0,0.95d0*(1-high_nlamb*solve_for_coeffs*(1-no_mIT))+1.1d0*high_nlamb*solve_for_coeffs*(1-no_MIT)  /) 	!1.1d0				! LTV
-    real(8), parameter, dimension(2) :: lambdaPTI=(/0.25d0*(1-high_nlamb)+high_nlamb*0.5d0,0.25d0*(1-high_nlamb*solve_for_coeffs*(1-no_mIT))+0.5d0*high_nlamb*solve_for_coeffs*(1-no_MIT) /)	!0.5d0					! PTI
-	real(8), parameter, dimension(2) :: xi=(/ 0.01d0*(1-high_nlamb)+high_nlamb*0.006d0 , 0.01d0*(1-high_nlamb*solve_for_coeffs*(1-no_MIT))+0.006d0*high_nlamb*solve_for_coeffs*(1-no_MIT) /)	! 0.006d0					! Mortgage pricing wedge 
-	real(8), parameter, dimension(2) :: kappam=(/2d3*(1-high_nlamb)+high_nlamb*1.2d3 ,2d3*(1-high_nlamb*solve_for_coeffs*(1-no_MIT))+1.2d3*high_nlamb*solve_for_coeffs*(1-no_MIT)/)/(DataAvAnnualEarns/Numeraire)! 1.2d3 ! Mortgage origination cost
+	real(8), parameter, dimension(3) :: lambdaLTV=	(/0.95d0*(1-high_nlamb)+high_nlamb*1.1d0,&
+													0.95d0*(1-high_nlamb*solve_for_coeffs*(1-no_mIT))+1.1d0*high_nlamb*solve_for_coeffs*(1-no_MIT),&
+													0.95d0*(1-high_nlamb*solve_for_coeffs*(1-no_mIT))+1.1d0*high_nlamb*solve_for_coeffs*(1-no_MIT)   /)		
+    real(8), parameter, dimension(3) :: lambdaPTI=	(/0.25d0*(1-high_nlamb)+high_nlamb*0.5d0,&
+													0.25d0*(1-high_nlamb*solve_for_coeffs*(1-no_mIT))+0.5d0*high_nlamb*solve_for_coeffs*(1-no_MIT),&
+													0.25d0*(1-high_nlamb*solve_for_coeffs*(1-no_mIT))+0.5d0*high_nlamb*solve_for_coeffs*(1-no_MIT)  /)
+	real(8), parameter, dimension(3) :: xi=			(/ 0.01d0*(1-high_nlamb)+high_nlamb*0.006d0 , &
+													0.01d0*(1-high_nlamb*solve_for_coeffs*(1-no_MIT))+0.006d0*high_nlamb*solve_for_coeffs*(1-no_MIT), &
+													0.01d0*(1-high_nlamb*solve_for_coeffs*(1-no_MIT))+0.006d0*high_nlamb*solve_for_coeffs*(1-no_MIT) /)	
+	real(8), parameter, dimension(3) :: kappam=		(/2d3*(1-high_nlamb)+high_nlamb*1.2d3 ,&
+													2d3*(1-high_nlamb*solve_for_coeffs*(1-no_MIT))+1.2d3*high_nlamb*solve_for_coeffs*(1-no_MIT),&
+													2d3*(1-high_nlamb*solve_for_coeffs*(1-no_MIT))+1.2d3*high_nlamb*solve_for_coeffs*(1-no_MIT)/)/(DataAvAnnualEarns/Numeraire)
 
 
 	
 
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	!		Model parameters
-	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
-	!4.070000000000000E-002  5.413100000000001E-002
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
     real(8), parameter :: beta=0.94d0*no_pref+(1-no_pref)*0.93d0 											! Discount factor, KMV have: 0.93d0 
     real(8), parameter :: riskfree=0.025d0 										! Risk free rate
     real(8), parameter :: iota=0.33d0 											! Mortgage wedge over risk-free rate
-	!real(8), parameter,dimension(2) :: r_lend_grid=(/5.17d-2,5.36d-2/) !(/5.91d-2,5.72d-2/) !(/5.91d-2,5.72d-2/) !(/5.72d-2,5.54d-2/)
-	!real(8), parameter,dimension(2) :: r_lend_grid=(/6.090000000000000d-2,6.090000000000000d-2/) !(/7.090000000000000d-2*high_rate+(1-high_rate)*6.090000000000000d-2*(1-high_nlamb)*(1-low_rate)+(1-high_rate)*high_nlamb*(1-low_rate)*6.090000000000000d-2+(1-high_rate)*high_nlamb*low_rate*4.070000000000000d-2,6.090000000000000d-2*(1-high_nlamb*solve_for_coeffs*(1-no_mIT)*(1-low_rate))+4.070000000000000d-2*high_nlamb*solve_for_coeffs*(1-no_MIT)*low_rate  /)
-	!This is derived from (1+0.03)^2-1=6.09d-2
-	! The mortage rate is thus (1+.33)*6.09d-2
-	!main simulation is 0.95* of original, 
-	!0.99d0 -running 
-	!0.98d0
-	!0.97d0
-	!0.96d0
-	real(8), parameter,dimension(2) :: r_lend_grid=(/ 6.090000000000000d-2*(1-high_nlamb)*(1-low_rate)+high_nlamb*(1-low_rate)*6.090000000000000d-2+high_nlamb*low_rate*(6.090000000000000d-2*0.97d0),6.090000000000000d-2*(1-high_nlamb*solve_for_coeffs*(1-no_mIT)*(1-low_rate))+(6.090000000000000d-2*0.95d0)*high_nlamb*solve_for_coeffs*(1-no_MIT)*low_rate  /)
+	real(8), parameter,dimension(3) :: r_lend_grid=(/(rate_bps+6.090000000000000d-2)*high_rate+(1-high_rate)*6.090000000000000d-2,6.090000000000000d-2,(rate_bps+6.090000000000000d-2)*Low_rate+(1-low_rate)*6.090000000000000d-2/)
 	
-	real(8), parameter,dimension(2) :: q_lend_grid=1d0/(1d0+r_lend_grid)
+	real(8), parameter,dimension(3) :: q_lend_grid=1d0/(1d0+r_lend_grid)
 	
-   real(8), parameter,dimension(2) :: r_borrow_grid=(/(0.4d0*(9.099700000000001d-2-8.099700000000001d-2)+8.099700000000001d-2)*high_rate+ (1-high_rate)*8.099700000000001d-2*(1-high_nlamb)*(1-low_rate)+(1-high_rate)*8.099700000000001d-2*high_nlamb*(1-low_rate)+(1-high_rate)*high_nlamb*low_rate*5.413100000000001d-2,8.099700000000001d-2*(1-high_nlamb*solve_for_coeffs*(1-no_mIT)*(1-low_rate))+5.413100000000001d-2*high_nlamb*solve_for_coeffs*(1-no_MIT)*low_rate  /)											!8.099700000000001d-002 						! Interest rate on borrowing, r_lend*(1d0+iota)
-   
-   
-   !(/ 8.099700000000001d-2*(1-high_nlamb)*(1-low_rate)+8.099700000000001d-2*high_nlamb*(1-low_rate)+high_nlamb*low_rate*(8.099700000000001d-2*0.97d0),8.099700000000001d-2*(1-high_nlamb*solve_for_coeffs*(1-no_mIT)*(1-low_rate))+(8.099700000000001d-2*0.95d0)*high_nlamb*solve_for_coeffs*(1-no_MIT)*low_rate  /)											!8.099700000000001d-002 						! Interest rate on borrowing, r_lend*(1d0+iota)
-    
-	real(8), parameter,dimension(2) :: q_borrow_grid=1d0/(1d0+r_borrow_grid)! Interest rate on borrowing, q form	
+    real(8), parameter,dimension(3) :: r_borrow_grid=(/(rate_bps+8.099700000000001d-2)*high_rate+ (1-high_rate)*8.099700000000001d-2,8.099700000000001d-2 ,(rate_bps+8.099700000000001d-2)*low_rate+ (1-low_rate)*8.099700000000001d-2/)		
+
+	real(8), parameter,dimension(3) :: q_borrow_grid=1d0/(1d0+r_borrow_grid)! Interest rate on borrowing, q form	
 	real(8), parameter :: tauh=0.02d0 											! Tax on housing 
     real(8), parameter :: delta=0.03d0 											! Housing depreciation
 	real(8), parameter :: delta_default=0.22d0									! Housing depreciation in default
@@ -139,8 +139,8 @@ module parameters
 	! original rental cost: 7.500000000000000d-2
 	! re-calibrated: 0.023342134d0
 	! average: 0.049171
-	real(8), parameter :: rental_cost=0.023342134d0 !7.500000000000000d-2 ! 0.049171d0 !0.023342134d0 !*no_pref+(1-no_pref)*6.426147610519373d-3  !		6.426147610519373d-3 !							! Rental company operating cost
-    real(8), parameter, dimension(2) :: rental_grid=rental_cost*(1d0-(1d0/(1d0+r_lend_grid))*(1d0-delta))
+	real(8), parameter :: rental_cost=0.023342134d0 
+	real(8), parameter, dimension(3) :: rental_grid=rental_cost*(1d0-(1d0/(1d0+r_lend_grid))*(1d0-delta))
 	real(8), parameter :: gamma_b=0.8d0											! IES
 	real(8), parameter :: sigma=2d0												! Risk aversion
 	real(8), parameter, dimension(3) :: phi_grid=(/0.13d0*no_pref+(1-no_pref)*0.2d0,0.13d0*no_pref+(1-no_pref)*0.12d0,0.13d0*no_pref+(1-no_pref)*0.12d0/) ! Housing preference !(/0.13d0*no_pref+(1-no_pref)*0.2d0,0.12d0*no_pref+(1-no_pref)*0.13d0,0.13d0*no_pref+(1-no_pref)*0.12d0/) ! Housing preference

@@ -30,7 +30,7 @@ program main
 	real(8), dimension(learn) :: pstar2, pCKW,pstarsort
 	real (8) :: LaborH,R2p_all,Yreveal
     real (8) :: L(nL), H(nH), Y(nY),Ybar(1), diff_solve_step(2),R(nR),Calibration(15),av_scale,Lsim(nLsim),Bsim(nBsim)
-    real (8), allocatable :: p(:),pprime(:,:,:,:),a_raw(:,:,:), FYY(:,:),Trans(:)
+    real (8), allocatable :: p(:),pprime(:,:,:,:),a_raw(:,:,:), FYY(:,:),Trans(:,:)
    	real (8), save :: loge(T,nE), Fee(T,nE,nE)
 	real (8), allocatable :: counts_h35(:,:), counts_h49(:,:), counts_h64(:,:), counts_h80(:,:)
 	real (8), allocatable :: counts_h(:,:), counts_r(:,:)
@@ -194,7 +194,7 @@ DOUBLE PRECISION, EXTERNAL          :: golden, fx
     end if
 		allocate(P(countP))
 		allocate(AggH_s(countP))
-		allocate(Trans(countP)) 
+		allocate(Trans(countP,nlamb)) 
 	if (CKW .eqv. .True. ) then 
 		P=pCKW(1:countP)
 	else
@@ -235,7 +235,7 @@ print*, nY*nlamb*nphi, countP, NA, Ny,nlamb,nphi, nP
 	
     call sub_initial_Y(Y,FYY,YT,AggT_loc,YT_loc,LambT_loc) 
 	
-    call sub_coeffs(a_raw,.True.)
+    call sub_coeffs(a_raw)
 
     init_loc=burn
   
@@ -321,7 +321,11 @@ print*, 'Done with grids and initial distribution'
 			do iYY=1,nY*nlamb*nphi
 				if (nA>1) then
 					do iA1=1,nA		
-						pprime(iY,iYY,:,iA1)=exp(a_raw(iY,iYY,1)+gain_param*adj(iA1)+(a_raw(iY,iYY,2)+gain_param*adj(iA1)*log(p(:)))*log(p(:)))
+						if (gain_param==0d0) then 
+							pprime(iY,iYY,:,iA1)=exp(a_raw(iY,iYY,1)+adj(iA1)+(a_raw(iY,iYY,2)+adj(iA1)*log(p(:)))*log(p(:)))
+						else
+							pprime(iY,iYY,:,iA1)=exp(a_raw(iY,iYY,1)+gain_param*adj(iA1)+(a_raw(iY,iYY,2)+gain_param*adj(iA1)*log(p(:)))*log(p(:)))
+						end if 
 					end do 
 				else
 					pprime(iY,iYY,:,1)=exp(a_raw(iY,iYY,1)+a_raw(iY,iYY,2)*log(p(:)))
@@ -373,7 +377,12 @@ print*, 'Done with grids and initial distribution'
 							else if ((iAgg==3 .or. iAgg==4) .and. no_Mit==0) then
 								next=3
 								nextplus=4
-							end if 
+							
+							else if ((iAgg==5 .or. iAgg==6) .and. no_Mit==0) then
+									next=5
+									nextplus=6
+								end if 
+
 							if (nA2==1 .and. nA>1 ) then
 					
 								rental(iAgg,iP,iA1,iA2)= max(1.0d-4,rental_grid(ilamb)+p(iP)*(1.0d0+tauh)-(1.0d0-delta)*dot_product((/pprime(iAgg,next,iP,iA1),pprime(iAgg,nextplus,iP,iA2)/),FYY(iAgg,next:nextplus))/(1.0d0+r_lend_grid(ilamb)))

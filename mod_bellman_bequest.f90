@@ -13,8 +13,8 @@ contains
     integer, dimension(:,:,:,:,:,:), intent (out) :: HHi_b
 	real(8), dimension(:,:,:,:,:,:), intent (out) :: BB_b,LL_b
 	real(8), dimension(:,:,:,:,:,:), intent (out) :: V_b
-    real(8), dimension(:), intent (in) :: R,H,L,p,Y,chi,Trans
-	real(8), dimension(:,:), intent (in) :: rental
+    real(8), dimension(:), intent (in) :: R,H,L,p,Y,chi
+	real(8), dimension(:,:), intent (in) :: rental,Trans
 	real(8), intent (in) :: e
     integer :: iY,iR,iE,iB,iBB, iD5, iD4,bbar,iD1, iL,iH,iD2,iExo,ilamb,iP,iAgg,iphi
 	real(8) :: BBmin1,BBmax1,BBmid1,Vtemp1a,Vtemp1b,btemp1beq,pm,mp!,phibeq
@@ -75,7 +75,7 @@ contains
 				do iR=1,nR
 				!	print*, 'before', iR, nR
 					BBmin4=0d0
-					cval4=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-rental(iAgg,iP)*R(iR)
+					cval4=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(iR)
 					
 					BBmax4=(cval4-cmin)/q_lend_grid(ilamb)
 					BBmid4=(BBmax4+BBmin4)/2.0d0
@@ -119,7 +119,7 @@ contains
 
 				! Do not need R loop for defaulters
 				BBmin5=0d0
-				cval5=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-rental(iAgg,iP)*R(1)
+				cval5=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(1)
 				BBmax5=(cval5-cmin)/q_lend_grid(ilamb)
 				BBmid5=(BBmax5+BBmin5)/2.0d0
 				
@@ -155,7 +155,7 @@ contains
 
 
 						
-	!print*, 'defaulter: giJ,giAgg,bc,hcc,ph,Pr,net income, gliq', iE,iAgg,iB,p(iP),B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-rental(iAgg,iP)*R(1), btemp5, BBmid5,BBmax5,V_b(1,1,iB,iAgg,iE,iP,iD5),-Vtemp5a
+	!print*, 'defaulter: giJ,giAgg,bc,hcc,ph,Pr,net income, gliq', iE,iAgg,iB,p(iP),B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(1), btemp5, BBmid5,BBmax5,V_b(1,1,iB,iAgg,iE,iP,iD5),-Vtemp5a
 				
 
 				do iH=1,nH
@@ -163,7 +163,7 @@ contains
 						
 						do iR=1,nR
 							BBmin1=0d0
-cval1beq=B(iB)+(1d0-delta-tauh-cost)*p(iP)*H(iH)-L(iL)*H(iH)*(1d0+r_borrow_grid(ilamb))+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxM(income_ret(chi(Jret-1),iE,mean(Y)),H(iH)*L(iL),min(0.0d0,B(ib)),r_borrow_grid(ilamb))+Trans(iP)-rental(iAgg,iP)*R(iR)
+cval1beq=B(iB)+(1d0-delta-tauh-cost)*p(iP)*H(iH)-L(iL)*H(iH)*(1d0+r_borrow_grid(ilamb))+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxM(income_ret(chi(Jret-1),iE,mean(Y)),H(iH)*L(iL),min(0.0d0,B(ib)),r_borrow_grid(ilamb))+Trans(iP,ilamb)-rental(iAgg,iP)*R(iR)
 		BBmax1=(cval1beq-(-1d0/death))/q_lend_grid(ilamb)
 						BBmid1=(BBmax1+BBmin1)/2.0d0
 							
@@ -215,7 +215,7 @@ bheloc2=-p(iP)*H(iH)*0.2d0
 							pm=MinPay(L(iL)*H(iH),T,r_borrow_grid(ilamb))
 							if (iL .eq. 1) pm=0d0
 							mp=(H(iH)*L(iL))*(1.0d0+r_borrow_grid(ilamb))-pm
-							cval2=-pm+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)
+							cval2=-pm+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)
 							!Other if for the bequest
 							other=p(iP)*H(iH)*(1d0-cost)-mp*(1d0+r_borrow_grid(ilamb)) !it should be L(iL)*(1d0+rm)*H(iH) and also need (-delta-tauh)*housevalue
 							BBmax2=(cval2-cmin)/q_lend_grid(ilamb)

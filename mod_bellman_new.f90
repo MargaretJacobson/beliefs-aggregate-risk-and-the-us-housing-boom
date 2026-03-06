@@ -16,9 +16,9 @@ contains
 	real(8), dimension(:,:,:,:,:,:), intent (out) :: BB_b,LL_b
     real(8), dimension(:,:,:,:,:), intent (in) :: q
 	real(8), dimension(:,:) :: bheloc(nH,nP)
-    real(8), dimension(:), intent (in) :: H,L,p,Y,chi,loge,Trans,R
+    real(8), dimension(:), intent (in) :: H,L,p,Y,chi,loge,R
     real(8), intent(in) :: e
-	real(8), dimension(:,:), intent(in) :: rental
+	real(8), dimension(:,:), intent(in) :: rental,Trans
     integer :: iY,iL,iLL,iH,iHH, iE,iD1,iD2,iD3,iD4,iD5, iD6,iD7,iB,iBB,Bbar,iExo,ilamb,iP,iR,iJ,iAgg,iPhi
     real(8) :: Vtemp1a,Vtemp1b,Vtemp2a,Vtemp2b,Vtemp3a,Vtemp3b,Vtemp4a,Vtemp4b,Vtemp5a,Vtemp5b,Vtemp6a,Vtemp6b,Vtemp7a,Vtemp7b,cval1_final,cval6_final, cval3_final,pm,mp,lyp,out!,phi
 	real(8) :: BBmin7, BBmax7, BBmid7,btemp7
@@ -93,9 +93,9 @@ contains
 					BBmin4=0d0
 
 					if (iJ<Jret) then 
-						cval4=B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-rental(iAgg,iP)*R(iR)
+						cval4=B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(iR)
 					else
-						cval4=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-rental(iAgg,iP)*R(iR)
+						cval4=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(iR)
 						
 					end if 
 
@@ -159,11 +159,11 @@ contains
 				Wval5=W_b(1,1,:,iExo,iP,1)
 				bheloc(:,iP)=-p(iP)*H*0.2d0
 				if (iJ<Jret) then 
-					cval5=B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-rental(iAgg,iP)*R(1)
+					cval5=B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(1)
 						
 				else
 					
-					cval5=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-rental(iAgg,iP)*R(1)
+					cval5=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(1)
 				end if 
 				BBmax5=(cval5-cmin)/q_lend_grid(ilamb)
 				BBmid5=(BBmax5+BBmin5)/2d0 !should be (BBmax5+BBmin5)/2.0d0 
@@ -187,7 +187,7 @@ contains
 					btemp5=0d0
 					cval5=cmin
 				end if	
-				!print*,iP,iE,iAgg, iB, -Vtemp5a, btemp5,bbmax5,bbmin5,bbmid5,B(iB)+income_ret(chi(Jret-1),iE,Y(iY))-FnTax(income_ret(chi(Jret-1),iE,Y(iY)))+Trans(iP)-rental(iAgg,iP)*R(1),-q_lend*btemp5,interp1q(B,Wval5,btemp5)/beta
+				!print*,iP,iE,iAgg, iB, -Vtemp5a, btemp5,bbmax5,bbmin5,bbmid5,B(iB)+income_ret(chi(Jret-1),iE,Y(iY))-FnTax(income_ret(chi(Jret-1),iE,Y(iY)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(1),-q_lend*btemp5,interp1q(B,Wval5,btemp5)/beta
 						
 					!print*,iE,iY, iB,iR, -Vtemp5a, V_b(iB,iY,iE,iD5), btemp5,cval5		
 				if (-Vtemp5a>V_b(1,1,iB,iExo,Ip,iD5)) then ! .and. upper3(iL)>=LL(iLL)) then
@@ -207,10 +207,10 @@ contains
 							!do iBB=1,nB
 						qval1=q(iLL,iH,:,iExo,iP)*L(iLL)*H(iH)
 						if (iJ<Jret) then 
-							cval1=B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) !fixed cost only shows up when L>0 
-							BBmax1=(B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)+H(iH)*L(iLL)-P(iP)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))))/q_lend_grid(ilamb)
+							cval1=B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) !fixed cost only shows up when L>0 
+							BBmax1=(B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)+H(iH)*L(iLL)-P(iP)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))))/q_lend_grid(ilamb)
 						else
-							cval1=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) 
+							cval1=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) 
 							BBmax1=B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))-P(iP)*H(iH)+L(iLL)*H(iH) -kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) !missing Trans(iP) and qlend
 						end if 
 
@@ -269,10 +269,10 @@ contains
 							BBmin3=bheloc(iH,iP)
 								
 							if (iJ<Jret) then 
-								cval3=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTaxm(income(chi(iJ),loge(iE),Y(iY)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)-kappam(ilamb) !+q(iLL,:,iH,iAgg,iE,iP)*L(iLL)*H(iH)
+								cval3=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTaxm(income(chi(iJ),loge(iE),Y(iY)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)-kappam(ilamb) !+q(iLL,:,iH,iAgg,iE,iP)*L(iLL)*H(iH)
 								BBmax3=(cval3+p(iP)*H(iH))/q_lend_grid(ilamb)
 							else
-								cval3=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)-kappam(ilamb) !+q(iLL,:,iH,iAgg,iE,iP)*L(iLL)*H(iH)
+								cval3=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)-kappam(ilamb) !+q(iLL,:,iH,iAgg,iE,iP)*L(iLL)*H(iH)
 								BBmax3=(cval3+L(iLL)*H(iH))/q_lend_grid(ilamb)
 							end if 
 									
@@ -319,9 +319,9 @@ contains
 							mp=(H(iH)*L(iL))*(1.0d0+r_borrow_grid(ilamb))-pm
 							BBmin2=bheloc(iH,iP)
 							if (iJ<Jret) then
-								cval2=p(iP)*(-delta-tauh)*H(iH)+B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTaxm(income(chi(iJ),loge(iE),Y(iY)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)-pm
+								cval2=p(iP)*(-delta-tauh)*H(iH)+B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTaxm(income(chi(iJ),loge(iE),Y(iY)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)-pm
 							else
-								cval2=p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)-pm
+								cval2=p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)-pm
 							end if 
 							BBmax2=(cval2)/q_lend_grid(ilamb)
 							BBmid2=(BBmax2+BBmin2)/2.d0
@@ -366,9 +366,9 @@ contains
 								
 								if (iJ<Jret) then
 									
-									cval2=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTaxm(income(chi(iJ),loge(iE),Y(iY)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)+L(iLL)*H(iH)
+									cval2=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTaxm(income(chi(iJ),loge(iE),Y(iY)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)+L(iLL)*H(iH)
 								else
-									cval2=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP)+L(iLL)*H(iH)
+									cval2=-H(iH)*L(iL)*(1d0+r_borrow_grid(ilamb))+p(iP)*(-delta-tauh)*H(iH)+B(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iL)*H(iH),minval((/0d0,B(iB)/)),r_borrow_grid(ilamb))+Trans(iP,ilamb)+L(iLL)*H(iH)
 								end if 
 								BBmax2=(cval2)/q_lend_grid(ilamb)
 								BBmid2=(BBmax2+BBmin2)/2.d0
@@ -432,7 +432,7 @@ contains
 
 						!if (iJ<Jret) then 
 						!else
-						cval7=BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-rental(iAgg,iP)*R(iR)
+						cval7=BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(iR)
 						
 						!end if 
 
@@ -480,7 +480,7 @@ contains
 				else if (iJ<Jret .and.  Bs(iB)+ income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))-R(1)*rental(iAgg,iP)>cmin) then 
 					do iR=1,nR
 						BBmin7=0d0
-						cval7=BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-rental(iAgg,iP)*R(iR)
+						cval7=BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-rental(iAgg,iP)*R(iR)
 						BBmax7=(cval7-cmin)/q_lend_grid(ilamb)
 						
 					
@@ -524,15 +524,15 @@ contains
 				end if 
 								do iH=1,nH	
 					do iLL=1,nL 
-						if (iJ>=Jret .and. BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) > cmin) then 
+						if (iJ>=Jret .and. BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) > cmin) then 
 					
 								! Buy a house
 							BBmin6=0d0 
 							qval6=q(iLL,iH,:,iExo,iP)*L(iLL)*H(iH)
 				
 						
-							cval6=BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) 
-							BBmax6=BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))-P(iP)*H(iH)+L(iLL)*H(iH) -kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL)))+Trans(iP) !missing Trans(iP) and qlend
+							cval6=BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) 
+							BBmax6=BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))-P(iP)*H(iH)+L(iLL)*H(iH) -kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL)))+Trans(iP,ilamb) !missing Trans(iP) and qlend
 				
 
 							
@@ -566,17 +566,17 @@ contains
 								BB_b(1,1,iB,iExo,iP,iD6)=btemp6
 								c_b(1,1,iB,iExo,iP,iD6)=cval6_final
 							end if
-						else if (iJ>=Jret .and. BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) <= cmin) then 
+						else if (iJ>=Jret .and. BS(iB)+income_ret(chi(Jret-1),iE,mean(Y))-FnTax(income_ret(chi(Jret-1),iE,mean(Y)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) <= cmin) then 
 							V_b(1,1,iB,iExo,iP,iD6)=death
 							LLi_b(1,1,iB,iExo,iP,iD6)=1
 							HHi_b(1,1,iB,iExo,iP,iD6)=1
 							BB_b(1,1,iB,iExo,iP,iD6)=0d0
 							c_b(1,1,iB,iExo,iP,iD6)=cmin
-						else if (iJ<Jret .and. BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) > cmin) then 
+						else if (iJ<Jret .and. BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) > cmin) then 
 							BBmin6=0d0 
 							qval6=q(iLL,iH,:,iExo,iP)*L(iLL)*H(iH)
-							cval6=BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) !fixed cost only shows up when L>0 
-							BBmax6=(BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)+H(iH)*L(iLL)-P(iP)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))))
+							cval6=BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) !fixed cost only shows up when L>0 
+							BBmax6=(BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)+H(iH)*L(iLL)-P(iP)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))))
 						
 						
 							BBmid6=(BBmax6+BBmin6)/2.0d0
@@ -611,7 +611,7 @@ contains
 							end if
 						
 						
-						else if (iJ<Jret .and. BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) <= cmin) then 
+						else if (iJ<Jret .and. BS(iB)+income(chi(iJ),loge(iE),Y(iY))-FnTax(income(chi(iJ),loge(iE),Y(iY)))+Trans(iP,ilamb)-p(ip)*H(iH)-kappam(ilamb)*min(1d0,100d0*max(0d0,L(iLL))) <= cmin) then 
 							V_b(1,1,iB,iExo,iP,iD6)=death
 							LLi_b(1,1,iB,iExo,iP,iD6)=1
 							HHi_b(1,1,iB,iExo,iP,iD6)=1

@@ -23,7 +23,7 @@ contains
     real(8),dimension(:), intent(out) :: AggH_s
     integer, intent(in) :: countP
     integer :: iP, iM, iJ, KV, iT,iter2,iI,iE,iEE,iY,neg, ilamb, ilamb2,iphi,iphi2,iAgg
-    real(8), dimension(:), intent(out) :: Trans
+    real(8), dimension(:,:), intent(out) :: Trans
     real(8), dimension(:),intent(out) :: V
     double precision :: meanchi
 	double precision :: lb(4)
@@ -144,11 +144,24 @@ print*, 'BS',BS
 	if (nlamb==1) then
 		Flamb=0d0
 		Flamb(1,1)=1
-	else 
+	else if (nlamb==2) then
 		Flamb(1,1)=agg_lamb
 		Flamb(1,2)=1d0-Flamb(1,1)
 		Flamb(2,2)=agg_lamb
 		Flamb(2,1)=1d0-Flamb(2,2)
+	else 
+		Flamb(1,1)=1d0
+		Flamb(1,2)=0d0
+		Flamb(1,3)=0d0
+
+		Flamb(2,1)=0d0
+		Flamb(2,2)=1d0
+		Flamb(2,3)=0d0
+
+		Flamb(3,1)=0d0
+		Flamb(3,2)=0d0
+		Flamb(3,3)=1d0
+
 	end if
 	
 	!Transition matrix for preferences
@@ -479,11 +492,24 @@ print*, 'BS',BS
     
 	! Transfer term in consumption
 	 if (countP==13) then
-	Trans(1:5)=(/2.854075402768506d-003, 4.195970408950399d-003, 5.858848718492038d-003,7.864906977237622d-003,1.023498750346541d-002/)
-	Trans(6:10)=(/1.298880000000000d-002,1.614508857052269d-002, 1.972176127472518d-002,2.373599303861534d-002,2.820430902065911d-002/)
-	Trans(11:13)=(/3.314265327033467d-002,3.856644607659063d-002,4.449063245604891d-002/)  
+
+	 Trans(1:5,1)=(/2.854075402768506d-003, 4.195970408950399d-003, 5.858848718492038d-003,7.864906977237622d-003,1.023498750346541d-002/)
+	Trans(6:10,1)=(/1.298880000000000d-002,1.614508857052269d-002, 1.972176127472518d-002,2.373599303861534d-002,2.820430902065911d-002/)
+	Trans(11:13,1)=(/3.314265327033467d-002,3.856644607659063d-002,4.449063245604891d-002/)  
+
+	Trans(1:5,2)=(/2.854075402768506d-003, 4.195970408950399d-003, 5.858848718492038d-003,7.864906977237622d-003,1.023498750346541d-002/)
+	Trans(6:10,2)=(/1.298880000000000d-002,1.614508857052269d-002, 1.972176127472518d-002,2.373599303861534d-002,2.820430902065911d-002/)
+	Trans(11:13,2)=(/3.314265327033467d-002,3.856644607659063d-002,4.449063245604891d-002/) 
+
 	else
-	 Trans=linspace(2.854075402768506d-003,4.449063245604891d-002,countP)
+	 Trans(:,1)=linspace(2.854075402768506d-003,4.449063245604891d-002,countP)
+	 Trans(:,2)=linspace(2.854075402768506d-003,4.449063245604891d-002,countP)
+	
+if (covid==1) then
+		Trans(:,3)=Trans(:,1)*(1-fiscal_transfer)+(Trans(:,1)+trans_amount)*fiscal_transfer
+	end if 
+
+
 	end if 
 	
 	print*, 'p',p

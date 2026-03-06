@@ -17,8 +17,8 @@ contains
     real(8), dimension(:,:,:), intent(in) :: a_raw
     real(8), dimension(:,:), intent(in) :: FYY
     real(8), dimension(:,:,:), intent(in) :: Fee
-    real(8), dimension(:), intent(in):: L,H,Y,chi,e,p,R,Trans
-    real(8), dimension(:,:), intent(in) :: loge
+    real(8), dimension(:), intent(in):: L,H,Y,chi,e,p,R
+    real(8), dimension(:,:), intent(in) :: loge,Trans
     integer :: iY,iYY,iJ,iLL,iHH,iP,it,iH,iL,iE,iA1,iA2,iM,Aloc,iD,iB, iAgg,iA,loc,ilamb,iExo,iPhi
  	real(8), dimension(:,:,:,:,:,:), intent(in) :: pprimein
     real(8), allocatable :: W_b(:,:,:,:,:,:,:,:,:)

@@ -35,7 +35,7 @@ LambT_loc=0
 	call random_seed(PUT=seed)
 
 	! Setting AggT_loc to the worst state:
-	AggT_loc=nY*nlamb*nphi
+	AggT_loc=nY*(nlamb-covid)*nphi
 	lambT_loc=ceiling(real(AggT_loc)/(real(nY)*real(nPhi)))
 	YT_loc=floor(real(AggT_loc)/(real(nPhi)*real(nY)*real(lambT_loc)))+1  
 	!print*, 'lambT_loc', ceiling(real()/(real(nY)*real(nPhi)))
@@ -43,7 +43,7 @@ LambT_loc=0
 	! Adding in the indices from KMV
 	! Need 4 to 1, 2 to 3, 3 to 2 and 4 to 1
 	
-	if (ny*nlamb==4 .and. no_Agg==0 .and. no_Agg_lend==0 .and. perfect_corr==1 .and. no_pref==1) then
+	if (no_Agg==0 .and. no_Agg_lend==0 .and. perfect_corr==1 .and. no_pref==1) then
 		AggT_loc(101:105)=1			!4 to 1
 		AggT_loc(106:110)=3			!1 to 3
 		AggT_loc(111:115)=2			!3 to 2
@@ -66,10 +66,10 @@ LambT_loc=0
 		!AggT_loc(300:305)=1			
 
 		sim_start=206
-	else if ((ny*nlamb==4 .or. nY*nlamb==2) .and. no_Agg==0) then ! .and. no_Agg_lend==0) then
+	else if ((ny*(nlamb-covid)==4 .or. nY*(nlamb-covid)==2) .and. no_Agg==0) then ! .and. no_Agg_lend==0) then
 		!sim_start=399
 		sim_start=155
-		AggT_loc(191:199)=(ny*nlamb*nphi)
+		AggT_loc(191:199)=(ny*(nlamb-covid)*nphi)
 		
 	end if 
 	do it=1,sim_start
@@ -130,7 +130,7 @@ LambT_loc=0
 	
     end do
 
-	if (nY*nLamb==4 .and. no_Agg==0 .and. no_agg_lend==0 .and. perfect_corr==0 .and. no_pref==1) then ! .and. type_sim==2) then 	
+	if (no_Agg==0 .and. no_agg_lend==0 .and. perfect_corr==0 .and. no_pref==1) then ! .and. type_sim==2) then 	
 	
 		! Need to manually set pre-housing boom so it starts in AggT_loc==4
 		iter=193
@@ -161,27 +161,34 @@ LambT_loc=0
 			lambT_loc(iter)=1
 			iter=iter+1
 		end do
-		!iter=202
-		!AggT_loc(iter)=3
-		!YT_loc(iter)=1 ! 2
-		!lambT_loc(iter)=2
 		
-		!iter=203
-		!AggT_loc(iter)=3
-		!YT_loc(iter)=1 ! 2
-		!lambT_loc(iter)=2
-		!iter=212
+		iter=204
 		AggT_loc(iter:iter+10)=4
 		YT_loc(iter:iter+10)=2 ! 2
 		lambT_loc(iter:iter+10)=2
-		
-		iter=290 !4904
-		!do while (iter<295) !(iter<4909)
-		!			AggT_loc(iter)=1
-		!	YT_loc(iter)=1
-		!	lambT_loc(iter)=1
-		!	iter=iter+1
-		!end do 
+
+		if (tighten_credit>0) then
+			iter=201
+			do while (iter<=tighten_credit) 
+			
+				AggT_loc(iter)=3
+				YT_loc(iter)=1 ! 2
+				lambT_loc(iter)=2
+				iter=iter+1
+
+			end do 
+		end if 
+
+		if (covid==1) then
+			iter=210
+			do while (iter<210+2)
+				AggT_loc(iter)=5
+				YT_loc(iter)=1
+				lambT_loc(iter)=3 
+				iter=iter+1
+			end do 
+		end if 
+
 
 		if (T_sim>300) then 	
 			iter=1000 !4904

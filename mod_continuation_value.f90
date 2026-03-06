@@ -282,7 +282,27 @@ contains
 								q(iLL,iHH,iBB,iExo,ip,1)=q(iLL,iHH,iBB,iExo,iP,1)-xi(ilamb) ! NOt (1d0-xi(ilamb)
 							end if 
 						end if 
-
+		!		if (iJ==2) then ! .and. iAgg==5 .and. (iP==4) ) then !8<iAgg .and. iAgg<=12 .and. iP==4) then !.and. .and. iE==5
+         !        mp=LL_b(iLL,iHH,iBB,iEExo,iP)*H(iHH)
+		!				      	pm=H(iHH)*L(iLL)*(1d0+r_borrow_grid(ilamblamb))-mp	
+								
+				!				if (iJ+1<Jret) then ! This is the next period value we are solving for
+				!			inc=FnTax(income(chi(iJ+1),loge(2,iE),Y(iY)))-FnTaxm(income(chi(iJ+1),loge(2,iE),Y(iY)),L(iLL)*H(iHH),minval((/0d0,B(iBB)/)),r_borrow_grid(ilamb))
+				!		else
+				!			inc=FnTax(income_ret(chi(Jret-1),iE,mean(Y)))-FnTaxm(income_ret(chi(Jret-1),iE,mean(Y)),L(iLL)*H(iHH),minval((/0d0,B(iBB)/)),r_borrow_grid(ilamb))
+				!		end if 
+				!			Wealth=B(iBB)+(1d0-delta-tauh-cost)*p(iP)*H(iHH)-(1d0+r_borrow_grid(ilamb))*L(iLL)*H(iHH)+inc
+							! replacing W_own with the correct values if an owner sells 
+						! uncomment for last period continuation value 
+							!print*, iBB,iLL,iHH,pay_out(iLL,iHH,iBB,iAgg,iE,iP),'loc',W_loc_own(iLL,iHH,iBB,iAgg,iE,iP),'W',W_b(iLL,iHH,iBB,iAgg,iE,iP,2)/beta,'W all',W_own(iLL,iHH,iBB,iAgg,iE,iP,1),W_own(iLL,iHH,iBB,iAgg,iE,iP,2),W_own(iLL,iHH,iBB,iAgg,iE,iP,5) !,pm,mp,min(1d0,(pm+min(mp,p(ip)*H(iHH)*(1d0-delta-tauh-cost))/(1d0+rm))/(H(iHH)*L(iLL)*(1d0+rm)))
+							! uncomment for all other periods
+		!	print*,ibB,ihH,iLL,iE,iP,pay_out(iLL,iHH,iBB,iExo,iP),q(iLL,iHH,iBB,iExo,iP,1),W_b(iLL,iHH,iBB,iExo,iP,2)/beta,W_b(1,1,iBB,iExo,iP,1)/beta,W_rent(iBB,iExo,iP),W_own2(iLL,iHH,iBB,iExo,iP),W_own(iLL,iHH,iBB,iExo,iP,:),pm,mp,pprime_print(iAgg,iP)
+			!,'theta prime1', theta_pprime(1,iAgg,:,iP,ibeliefs),'theta prime2', theta_pprime(2,iAgg,:,iP,ibeliefs),'trans', FYY(iAgg,:),Fee(iE,:) !, wealth,inc! ,LL_b(iLL,iHH,iBB,iExo,iP),interp1qnoextrap(L,q(:,iHH,iBB,iExo,iP,2),mp/H(iHH))
+	!!!	print*,ibB,ihH,iLL,iAgg,iE,pay_out(iLL,iHH,iBB,iExo,ilo_pprime(:,iP,ibeliefs)) ,bump,q(iLL,iHH,iBB,iExo,iP,1),W_b(iLL,iHH,iBB,iExo,iP,2)/beta,W_b(1,1,iBB,iExo,iP,1)/beta,W_rent(iBB,iExo,iP),W_own2(iLL,iHH,iBB,iExo,iP),W_own(iLL,iHH,iBB,iExo,iP,:),pm ,LL_b(iLL,iHH,iBB,iExo,iP),interp1qnoextrap(L,q(:,iHH,iBB,iExo,iP,2),mp/H(iHH)) !,W_own(iLL,iHH,iBB,Agg,iE,iP,3),pm,mp !,W_own(iLL,iHH,iBB,iAgg,iE,iP,4:)
+		!if (LL_b(iLL,iHH,iBB,iExo,iP)>1 .or. LL_b(iLl,iHH,iBB,iExo,iP)<0) then 
+	!	print*, iLL,iHH,iBB,iExo,iE, iY,ilamb,iAgg, pay_out1, pay_out2, LL_b(iLL,iHH,iBB,iExo,iP)
+	!	end if 
+	!					end if
 
 	
 						!print*, iLL, iBB,iY,iE,iHH,iYY,iEE
